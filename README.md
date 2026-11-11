@@ -4,6 +4,8 @@ A [Waybar](https://github.com/Alexays/Waybar) configuration for [Hyprland](https
 
 It's a floating sheet of sky-tinted glass with drifting bubbles behind it, glossy aqua capsules, workspaces drawn as glass bubbles, and a calendar popup with events.
 
+Frutiger Aero is my favorite design language ever, it gives me a sense of calm and freedom, also makes me nostalgic in a hopeful way. I like to decorate my personal things in this style, so my desktop environment is definitely a must, hope you like it just as much as I do! Feel free to use it!
+
 ![The full bar: a floating strip of blue glass with workspace bubbles on the left, the date and time in the centre, and the bubble toggle, brightness slider and battery on the right, with small bubbles drifting through the glass](docs/bar.png)
 
 | Workspaces | Date & time | Bubbles toggle · brightness · battery |
