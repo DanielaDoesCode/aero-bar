@@ -4,9 +4,18 @@ A [Waybar](https://github.com/Alexays/Waybar) configuration for [Hyprland](https
 
 It's a floating sheet of sky-tinted glass with drifting bubbles behind it, glossy aqua capsules, workspaces drawn as glass bubbles, and a calendar popup with events.
 
+![The full bar: a floating strip of blue glass with workspace bubbles on the left, the date and time in the centre, and the bubble toggle, brightness slider and battery on the right, with small bubbles drifting through the glass](docs/bar.png)
+
+| Workspaces | Date & time | Bubbles toggle · brightness · battery |
+|:---:|:---:|:---:|
+| ![Three glass workspace bubbles; the active one is a wider aqua orb](docs/bar-left.png) | ![The clock capsule: date and time in a glossy sky-blue pill](docs/bar-center.png) | ![The bubble toggle, the brightness capsule with its glass slider, and a green charging battery capsule](docs/bar-right.png) |
+
 <p align="center">
   <img src="docs/calendar-popup.png" alt="The Aero Calendar popup: a frosted sky-blue glass panel with a glossy aqua title bar, glass day tiles, today shown as an aqua orb, and a list of events" width="400">
+  <br><em>The Aero Calendar popup, opened by clicking the clock</em>
 </p>
+
+<sub>Screenshots taken on Hyprland at scale 2 with blur enabled. Date and day names follow the system locale (Portuguese here).</sub>
 
 ---
 
