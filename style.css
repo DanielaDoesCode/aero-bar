@@ -1,0 +1,308 @@
+/* ─────────────────────────────────────────────────────────────
+   Frutiger Aero waybar
+   Recipe for the gloss: every glossy surface has two background layers:
+     1) a "shine" layer: bright white top half, hard cut at 50%,
+        faint glow at the bottom (light bouncing back up)
+     2) the colour layer underneath (sky / aqua / grass gradient)
+   plus a thin white rim and a soft blue drop-shadow.
+   ───────────────────────────────────────────────────────────── */
+
+/* bubble animation on/off: written by scripts/bubbles.sh (the 🫧 button) */
+@import "bubbles-anim.css";
+
+/* palette */
+@define-color ink        #0d3550;   /* deep sea text */
+@define-color sky-top    #e6f7ff;
+@define-color sky-bottom #8fd0f5;
+@define-color aqua       #2fb4ef;
+@define-color aqua-deep  #0b6fb8;
+@define-color grass      #6fd14a;
+@define-color grass-deep #2c8f22;
+@define-color amber      #ffc23d;
+@define-color ember      #ff5a3c;
+
+* {
+  font-family: "Segoe UI", "Open Sans", "Noto Sans", "MesloLGS Nerd Font Propo";
+  font-size: 13px;
+  font-weight: 600;
+  min-height: 0;
+  border: none;
+  border-radius: 0;
+}
+
+/* ── drifting bubbles ──────────────────────────────────────────
+   Pre-rendered seamless PNG tiles (see scripts/make-bubbles.py): blitting
+   an image each frame is far cheaper than re-rasterising gradients.
+   Each layer ends its loop on a whole multiple of its tile size
+   (near 240x34, mid 310x34, far 380x34), so the loop never jumps.
+   Layer order: near, mid, far bubbles, then the 2 static glass layers.
+
+   Perf note: an animated background repaints the whole bar every frame,
+   and GTK3 blurred box-shadows are very slow to repaint. So shadows here
+   use 0 blur (cheap), except the active-workspace glow. steps(1800) over
+   60s = 30 updates/s; sub-pixel image positioning keeps it smooth. */
+@keyframes aero-bubbles {
+  from {
+    background-position: 0 0, 0 0, 0 0, 0 0, 0 0;
+  }
+  to {
+    background-position:
+      240px -102px,    /* near: drifts right, rises fastest */
+      -310px -68px,    /* mid: drifts left                 */
+      380px -34px,     /* far: drifts right, rises slowest */
+      0 0, 0 0;
+  }
+}
+
+/* ── the bar: a floating sheet of sky-tinted glass ─────────── */
+window#waybar {
+  background-color: transparent;
+  background-image:
+    url("bubbles/near.png"),
+    url("bubbles/mid.png"),
+    url("bubbles/far.png"),
+    /* glass shine */
+    linear-gradient(to bottom,
+      rgba(255, 255, 255, 0.55) 0%,
+      rgba(255, 255, 255, 0.18) 50%,
+      rgba(255, 255, 255, 0.00) 51%,
+      rgba(255, 255, 255, 0.12) 100%),
+    linear-gradient(to bottom,
+      rgba(200, 236, 255, 0.55),
+      rgba(110, 190, 235, 0.45));
+  background-size: auto, auto, auto, 100% 100%, 100% 100%;
+  background-repeat: repeat, repeat, repeat, no-repeat, no-repeat;
+  /* animation is set in bubbles-anim.css */
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  border-radius: 17px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  color: @ink;
+}
+
+tooltip {
+  background-image: linear-gradient(to bottom, #ffffff, #dff3ff);
+  border: 1px solid rgba(60, 150, 210, 0.6);
+  border-radius: 10px;
+}
+tooltip label {
+  color: @ink;
+  font-weight: 500;
+}
+
+/* ── shared glossy capsule ─────────────────────────────────── */
+#clock,
+#brightness,
+#custom-bubbles,
+#battery {
+  margin: 4px 0;
+  padding: 0 14px;
+  border-radius: 999px;
+  color: @ink;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  background-image:
+    linear-gradient(to bottom,
+      rgba(255, 255, 255, 0.95) 0%,
+      rgba(255, 255, 255, 0.45) 48%,
+      rgba(255, 255, 255, 0.00) 50%,
+      rgba(255, 255, 255, 0.35) 100%),
+    linear-gradient(to bottom, @sky-top, @sky-bottom);
+  box-shadow:
+    inset 0 -2px 0 rgba(20, 110, 180, 0.30),
+    0 1px 0 rgba(10, 70, 120, 0.35);
+}
+
+#clock {
+  padding: 0 18px;
+  font-size: 13.5px;
+}
+
+#workspaces {
+  margin-left: 6px;
+}
+
+/* keep the last capsule off the bar's rounded right edge */
+#battery {
+  margin-right: 6px;
+}
+
+/* ── workspaces: glass bubbles ─────────────────────────────── */
+#workspaces button {
+  min-width: 22px;
+  min-height: 22px;
+  margin: 5px 3px;
+  padding: 0;
+  border-radius: 999px;
+  color: @ink;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  background-image:
+    linear-gradient(to bottom,
+      rgba(255, 255, 255, 0.95) 0%,
+      rgba(255, 255, 255, 0.35) 45%,
+      rgba(255, 255, 255, 0.00) 50%,
+      rgba(255, 255, 255, 0.30) 100%),
+    radial-gradient(circle at 50% 85%,
+      rgba(210, 242, 255, 0.95),
+      rgba(140, 205, 240, 0.85));
+  box-shadow:
+    inset 0 -2px 0 rgba(30, 120, 190, 0.30),
+    0 1px 0 rgba(10, 70, 120, 0.35);
+  transition: all 200ms ease;
+}
+
+#workspaces button:hover {
+  box-shadow:
+    inset 0 -2px 0 rgba(30, 120, 190, 0.30),
+    0 0 0 rgba(120, 220, 255, 0.95);
+}
+
+/* the desktop you're on: a saturated aqua orb */
+#workspaces button.active {
+  min-width: 38px;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 50, 100, 0.8);
+  border: 1px solid rgba(220, 245, 255, 0.95);
+  background-image:
+    linear-gradient(to bottom,
+      rgba(255, 255, 255, 0.85) 0%,
+      rgba(255, 255, 255, 0.25) 46%,
+      rgba(255, 255, 255, 0.00) 50%,
+      rgba(140, 240, 255, 0.35) 100%),
+    radial-gradient(circle at 50% 90%, #7ee6ff, @aqua 55%, @aqua-deep);
+  box-shadow:
+    inset 0 -2px 4px rgba(0, 60, 120, 0.45),
+    0 0 8px rgba(60, 190, 255, 0.85);
+}
+
+#workspaces button.urgent {
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(120, 40, 0, 0.8);
+  background-image:
+    linear-gradient(to bottom,
+      rgba(255, 255, 255, 0.85) 0%,
+      rgba(255, 255, 255, 0.20) 46%,
+      rgba(255, 255, 255, 0.00) 50%),
+    radial-gradient(circle at 50% 90%, #ffd27a, #ff9a1f 60%, #d9620a);
+}
+
+/* ── brightness capsule (icon + % + slider) ───────────────── */
+#brightness {
+  padding: 0 12px 0 14px;
+}
+
+#backlight {
+  padding-right: 8px;
+  background: none;
+}
+
+#backlight-slider {
+  background: none;
+  padding: 0 4px;   /* GTK themes pad scales by 12px; that inflates the bar */
+  margin: 0;
+}
+
+#backlight-slider contents {
+  margin: 0;
+}
+
+/* the groove: a recessed glass channel */
+#backlight-slider trough {
+  min-width: 96px;
+  min-height: 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(20, 100, 160, 0.35);
+  background-image: linear-gradient(to bottom,
+    rgba(40, 110, 160, 0.35),
+    rgba(255, 255, 255, 0.55));
+  box-shadow: inset 0 1px 0 rgba(0, 50, 90, 0.35);
+}
+
+/* the filled part: a little "aqua → grass" eco gradient */
+#backlight-slider highlight {
+  min-height: 8px;
+  border-radius: 999px;
+  background-image:
+    linear-gradient(to bottom,
+      rgba(255, 255, 255, 0.75) 0%,
+      rgba(255, 255, 255, 0.15) 50%,
+      rgba(255, 255, 255, 0.00) 51%),
+    linear-gradient(to right, @aqua, @grass);
+}
+
+/* the knob: a tiny glossy pearl */
+#backlight-slider slider {
+  min-width: 14px;
+  min-height: 14px;
+  margin: -3px 0;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  background-image:
+    linear-gradient(to bottom,
+      rgba(255, 255, 255, 1.0) 0%,
+      rgba(255, 255, 255, 0.6) 48%,
+      rgba(255, 255, 255, 0.0) 50%),
+    radial-gradient(circle at 50% 85%, #bdeeff, #5bbcec);
+  box-shadow: 0 1px 0 rgba(0, 60, 110, 0.5);
+}
+
+/* ── battery states ────────────────────────────────────────── */
+#battery.charging,
+#battery.plugged,
+#battery.full {
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 70, 0, 0.75);
+  background-image:
+    linear-gradient(to bottom,
+      rgba(255, 255, 255, 0.85) 0%,
+      rgba(255, 255, 255, 0.25) 48%,
+      rgba(255, 255, 255, 0.00) 50%,
+      rgba(200, 255, 160, 0.35) 100%),
+    linear-gradient(to bottom, #a6ec7c, @grass 55%, @grass-deep);
+}
+
+#battery.warning:not(.charging) {
+  background-image:
+    linear-gradient(to bottom,
+      rgba(255, 255, 255, 0.90) 0%,
+      rgba(255, 255, 255, 0.30) 48%,
+      rgba(255, 255, 255, 0.00) 50%),
+    linear-gradient(to bottom, #ffe9a8, @amber);
+}
+
+@keyframes aero-pulse {
+  to {
+    box-shadow:
+      inset 0 -2px 3px rgba(120, 20, 0, 0.35),
+      0 0 10px rgba(255, 90, 60, 0.95);
+  }
+}
+
+#battery.critical:not(.charging) {
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(110, 0, 0, 0.8);
+  background-image:
+    linear-gradient(to bottom,
+      rgba(255, 255, 255, 0.80) 0%,
+      rgba(255, 255, 255, 0.20) 48%,
+      rgba(255, 255, 255, 0.00) 50%),
+    linear-gradient(to bottom, #ff9a7a, @ember 55%, #c62a12);
+  animation: aero-pulse 1s ease-in-out infinite alternate;
+}
+
+/* ── bubble toggle button ──────────────────────────────────── */
+#custom-bubbles {
+  padding: 0 9px;
+  font-family: "Noto Color Emoji";
+  font-size: 13px;
+}
+
+#custom-bubbles:hover {
+  box-shadow:
+    inset 0 -2px 0 rgba(20, 110, 180, 0.30),
+    0 0 6px rgba(120, 220, 255, 0.95);
+}
+
+#custom-bubbles.off {
+  opacity: 0.5;
+}

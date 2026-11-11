@@ -1,0 +1,84 @@
+// ─────────────────────────────────────────────────────────────
+//  Frutiger Aero waybar
+//  glossy glass, sky-blue aqua, bubbles, rounded everything
+// ─────────────────────────────────────────────────────────────
+{
+  "layer": "top",
+  "position": "top",
+  "height": 34,
+  "margin-top": 6,
+  "margin-left": 10,
+  "margin-right": 10,
+  "spacing": 6,
+  "exclusive": true,
+  "fixed-center": true,
+
+  "modules-left": ["hyprland/workspaces"],
+  "modules-center": ["clock"],
+  "modules-right": ["custom/bubbles", "group/brightness", "battery"],
+
+  // ── bubble animation on/off ─────────────────────────────────
+  "custom/bubbles": {
+    "exec": "~/.config/waybar/scripts/bubbles.sh",
+    "return-type": "json",
+    "interval": "once",
+    "on-click": "~/.config/waybar/scripts/bubbles.sh toggle"
+  },
+
+  // ── desktops: one glossy bubble per open workspace ──────────
+  "hyprland/workspaces": {
+    "format": "{id}",
+    "on-click": "activate",
+    "all-outputs": true,
+    "active-only": false,
+    "on-scroll-up": "hyprctl dispatch workspace e-1",
+    "on-scroll-down": "hyprctl dispatch workspace e+1",
+    "sort-by-number": true,
+    "tooltip": false
+  },
+
+  // ── date & time ─────────────────────────────────────────────
+  "clock": {
+    "interval": 1,
+    "format": "<span alpha='70%'>{:L%A, %d %B</span>   <b>%H:%M}</b>",
+    // click opens the Aero Calendar popup (click again or Esc closes it)
+    "on-click": "~/.config/waybar/calendar/aero-calendar.py",
+    "tooltip": false
+  },
+
+  // ── brightness: icon + percentage + slider in one capsule ───
+  "group/brightness": {
+    "orientation": "horizontal",
+    "modules": ["backlight", "backlight/slider"]
+  },
+  "backlight": {
+    "device": "intel_backlight",
+    "format": "{icon} {percent}%",
+    "format-icons": ["󰃞", "󰃟", "󰃠"],
+    "on-scroll-up": "brightnessctl set 5%+",
+    "on-scroll-down": "brightnessctl set 5%-",
+    "tooltip": false
+  },
+  "backlight/slider": {
+    "device": "intel_backlight",
+    "min": 1,
+    "max": 100,
+    "orientation": "horizontal"
+  },
+
+  // ── battery ─────────────────────────────────────────────────
+  "battery": {
+    "bat": "BAT0",
+    "interval": 30,
+    "states": {
+      "warning": 30,
+      "critical": 15
+    },
+    "format": "{icon} {capacity}%",
+    "format-charging": "󰂄 {capacity}%",
+    "format-plugged": "󰚥 {capacity}%",
+    "format-full": "󰁹 Full",
+    "format-icons": ["󰁺", "󰁼", "󰁾", "󰂀", "󰂂", "󰁹"],
+    "tooltip-format": "{timeTo}\n{power:.1f} W"
+  }
+}
