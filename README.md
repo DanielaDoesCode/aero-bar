@@ -30,6 +30,7 @@ Frutiger Aero is my favorite design language ever, it gives me a sense of calm a
 - [Customising](#customising)
 - [Files](#files)
 - [References](#references)
+- [License](#license)
 
 ---
 
@@ -267,5 +268,9 @@ docs/                      README images
 - [Google Calendar API](https://developers.google.com/calendar/api/guides/overview) (optional sync)
 
 ---
+
+## License
+
+[MIT](LICENSE): use, change and share it freely, just keep the copyright notice.
 
 Made with [Claude Code](https://claude.com/claude-code).
